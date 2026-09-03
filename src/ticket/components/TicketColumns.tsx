@@ -27,6 +27,7 @@ export const ticketColumns = (
   onEdit: (ticket: Ticket) => void,
   onReassign: (ticket: Ticket) => void,
   isSupervisor: boolean,
+  isAdmin: boolean,
 ): ColumnDef<Ticket, unknown>[] => [
     {
       accessorKey: "id",
@@ -99,7 +100,7 @@ export const ticketColumns = (
               </DropdownMenuItem>)
 
             }
-            {isSupervisor && (
+            {(isSupervisor || isAdmin) && (
               <DropdownMenuItem onClick={() => onReassign(row.original)}>
                 Reasignar
               </DropdownMenuItem>

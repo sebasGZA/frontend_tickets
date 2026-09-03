@@ -44,7 +44,7 @@ export const TicketsPage = () => {
         placeholderData: (prev) => prev,
     });
 
-    const { isSupervisor } = useAuthStore();
+    const { isSupervisor, isAdmin } = useAuthStore();
 
     const [reassigningTicket, setReassigningTicket] = useState<Ticket | null>(null);
     const reassignFormRef = useRef<ReassignFormHandle>(null);
@@ -137,7 +137,12 @@ export const TicketsPage = () => {
             />
 
             <CustomDataTable
-                columns={ticketColumns(setEditingTicket, setReassigningTicket, isSupervisor())}
+                columns={ticketColumns(
+                    setEditingTicket, 
+                    setReassigningTicket, 
+                    isSupervisor(),
+                    isAdmin()
+                )}
                 data={data?.data ?? []}
                 pageCount={data?.totalPages ?? 0}
                 totalItems={data?.total ?? 0}
