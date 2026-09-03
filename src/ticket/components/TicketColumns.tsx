@@ -2,7 +2,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router";
 
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,17 +10,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { Ticket } from "../interfaces/ticket.interface";
 
-const statusConfig: Record<Ticket["status"], { label: string; variant: "default" | "secondary" | "outline" }> = {
-  abierto: { label: "Abierto", variant: "default" },
-  en_progreso: { label: "En progreso", variant: "secondary" },
-  cerrado: { label: "Cerrado", variant: "outline" },
+const statusConfig: Record<Ticket["status"], { label: string; className: string | "outline" }> = {
+  Abierto: { label: "Baja", className: "bg-slate-100 text-slate-700" },
+  En_proceso: { label: "Media", className: "bg-blue-100 text-blue-700" },
+  Cerrado: { label: "Alta", className: "bg-orange-100 text-orange-700" },
+  Reabierto: { label: "Crítica", className: "bg-red-100 text-red-700" },
 };
 
 const priorityConfig: Record<Ticket["priority"], { label: string; className: string }> = {
-  baja: { label: "Baja", className: "bg-slate-100 text-slate-700" },
-  media: { label: "Media", className: "bg-blue-100 text-blue-700" },
-  alta: { label: "Alta", className: "bg-orange-100 text-orange-700" },
-  critica: { label: "Crítica", className: "bg-red-100 text-red-700" },
+  Baja: { label: "Baja", className: "bg-slate-100 text-slate-700" },
+  Media: { label: "Media", className: "bg-blue-100 text-blue-700" },
+  Alta: { label: "Alta", className: "bg-orange-100 text-orange-700" },
+  Critica: { label: "Crítica", className: "bg-red-100 text-red-700" },
 };
 
 export const ticketColumns: ColumnDef<Ticket, unknown>[] = [
@@ -47,7 +47,11 @@ export const ticketColumns: ColumnDef<Ticket, unknown>[] = [
     header: "Estado",
     cell: ({ row }) => {
       const config = statusConfig[row.original.status];
-      return <Badge variant={config.variant}>{config.label}</Badge>;
+      return (
+        <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${config.className}`}>
+          {config.label}
+        </span>
+      )
     },
   },
   {

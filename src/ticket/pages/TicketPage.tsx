@@ -1,16 +1,23 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
+import { Plus } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { PaginationState } from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
 
 import { CustomDataTable } from "@/components/custom/CustomDataTable";
 import { ticketColumns } from "../components/TicketColumns";
 import { TicketsFilters } from "../components/TicketFilter";
 import { useDebounce } from "@/hooks/useDebounce";
 import { getTicketsAction } from "../actions/get-tickets.action";
+import { CustomFormModal } from "@/components/custom/CustomFormModal";
+import { TicketForm, type TicketFormHandle, type TicketFormValues } from "../components/TicketForm";
+import { createTicketAction } from "../actions/create-ticket.action";
+import { getClientsSelectAction } from "../actions/get-clients-select.action";
 
 export const TicketsPage = () => {
     const [search, setSearch] = useState("");
-    const [status, setEstado] = useState("todos");
+    const [status, setStatus] = useState("todos");
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
@@ -30,11 +37,39 @@ export const TicketsPage = () => {
         placeholderData: (prev) => prev,
     });
 
+    const [createOpen, setCreateOpen] = useState(false);
+    const formRef = useRef<TicketFormHandle>(null);
+    const queryClient = useQueryClient();
+
+    const { data: clients = [] } = useQuery({
+        queryKey: ["clients-select"],
+        queryFn: getClientsSelectAction,
+        enabled: createOpen,
+    });
+
+    const { mutate: create, isPending } = useMutation({
+        mutationFn: createTicketAction,
+        onSuccess: () => {
+            toast.success("Ticket creado");
+            queryClient.invalidateQueries({ queryKey: ["tickets"] });
+            setCreateOpen(false);
+        },
+        onError: () => toast.error("No se pudo crear el ticket"),
+    });
+
+    const handleCreate = (values: TicketFormValues) => create(values);
+
     return (
         <div>
-            <div className="mb-8">
-                <h1 className="text-2xl font-semibold tracking-tight">Tickets</h1>
-                <p className="text-muted-foreground mt-1">Gestioná las solicitudes de soporte</p>
+            <div className="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-semibold tracking-tight">Tickets</h1>
+                    <p className="text-muted-foreground mt-1">Gestioná las solicitudes de soporte</p>
+                </div>
+                <Button onClick={() => setCreateOpen(true)} className="gap-1.5">
+                    <Plus className="h-4 w-4" />
+                    Nuevo ticket
+                </Button>
             </div>
 
             <TicketsFilters
@@ -45,7 +80,7 @@ export const TicketsPage = () => {
                 }}
                 status={status}
                 onStatusChange={(value) => {
-                    setEstado(value);
+                    setStatus(value);
                     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
                 }}
             />
@@ -59,6 +94,18 @@ export const TicketsPage = () => {
                 onPaginationChange={setPagination}
                 isLoading={isLoading}
             />
+
+            <CustomFormModal
+                open={createOpen}
+                onOpenChange={setCreateOpen}
+                title="Nuevo ticket"
+                description="Registrá una nueva solicitud de soporte"
+                onSubmit={() => formRef.current?.submit()}
+                isSubmitting={isPending}
+                submitLabel="Crear ticket"
+            >
+                <TicketForm ref={formRef} onSubmit={handleCreate} clients={clients} />
+            </CustomFormModal>
         </div>
     );
 };

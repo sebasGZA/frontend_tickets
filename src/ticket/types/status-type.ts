@@ -1,0 +1,1 @@
+export type StatusType = "Abierto" | "En_proceso" | "Cerrado" | "Reabierto" 
