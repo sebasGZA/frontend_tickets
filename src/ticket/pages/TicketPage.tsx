@@ -16,6 +16,10 @@ import { createTicketAction } from "../actions/create-ticket.action";
 import { getClientsSelectAction } from "../actions/get-clients-select.action";
 import type { Ticket } from "../interfaces/ticket.interface";
 import { updateTicketAction } from "../actions/update-ticket.action";
+import { ReassignTicketForm, type ReassignFormHandle, type ReassignFormValues } from "../components/ReassignTicketForm";
+import { useAuthStore } from "@/auth/store/auth.store";
+import { getAgentsForSelectAction } from "../actions/get-agents-select.action";
+import { reassignTicketAction } from "../actions/reassign-ticket.action";
 
 export const TicketsPage = () => {
     const [search, setSearch] = useState("");
@@ -38,6 +42,27 @@ export const TicketsPage = () => {
                 status: status === "todos" ? undefined : status,
             }),
         placeholderData: (prev) => prev,
+    });
+
+    const { isSupervisor } = useAuthStore();
+
+    const [reassigningTicket, setReassigningTicket] = useState<Ticket | null>(null);
+    const reassignFormRef = useRef<ReassignFormHandle>(null);
+
+    const { data: agents = [] } = useQuery({
+        queryKey: ["agents-select"],
+        queryFn: getAgentsForSelectAction,
+        enabled: !!reassigningTicket,
+    });
+
+    const { mutate: reassign, isPending: isReassigning } = useMutation({
+        mutationFn: (values: ReassignFormValues) => reassignTicketAction(reassigningTicket!.id, values),
+        onSuccess: () => {
+            toast.success("Ticket reasignado");
+            queryClient.invalidateQueries({ queryKey: ["tickets"] });
+            setReassigningTicket(null);
+        },
+        onError: () => toast.error("No se pudo reasignar el ticket"),
     });
 
     const [createOpen, setCreateOpen] = useState(false);
@@ -88,10 +113,14 @@ export const TicketsPage = () => {
                     <h1 className="text-2xl font-semibold tracking-tight">Tickets</h1>
                     <p className="text-muted-foreground mt-1">Gestioná las solicitudes de soporte</p>
                 </div>
-                <Button onClick={() => setCreateOpen(true)} className="gap-1.5">
-                    <Plus className="h-4 w-4" />
-                    Nuevo ticket
-                </Button>
+                {
+                    !isSupervisor() && (
+                        <Button onClick={() => setCreateOpen(true)} className="gap-1.5">
+                            <Plus className="h-4 w-4" />
+                            Nuevo ticket
+                        </Button>
+                    )
+                }
             </div>
 
             <TicketsFilters
@@ -108,7 +137,7 @@ export const TicketsPage = () => {
             />
 
             <CustomDataTable
-                columns={ticketColumns(setEditingTicket)}
+                columns={ticketColumns(setEditingTicket, setReassigningTicket, isSupervisor())}
                 data={data?.data ?? []}
                 pageCount={data?.totalPages ?? 0}
                 totalItems={data?.total ?? 0}
@@ -116,6 +145,26 @@ export const TicketsPage = () => {
                 onPaginationChange={setPagination}
                 isLoading={isLoading}
             />
+
+            <CustomFormModal
+                open={!!reassigningTicket}
+                onOpenChange={(open) => !open && setReassigningTicket(null)}
+                title="Reasignar ticket"
+                description={reassigningTicket ? `#${reassigningTicket.id.slice(0, 8)} — ${reassigningTicket.title}` : undefined}
+                onSubmit={() => reassignFormRef.current?.submit()}
+                isSubmitting={isReassigning}
+                submitLabel="Reasignar"
+            >
+                {reassigningTicket && (
+                    <ReassignTicketForm
+                        key={reassigningTicket.id}
+                        ref={reassignFormRef}
+                        currentAgentId={reassigningTicket.assignedToId}
+                        agents={agents}
+                        onSubmit={(values) => reassign(values)}
+                    />
+                )}
+            </CustomFormModal>
 
             <CustomFormModal
                 open={createOpen}

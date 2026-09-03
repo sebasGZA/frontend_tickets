@@ -9,5 +9,6 @@ export interface Ticket {
   status: StatusType;
   priority: PriorityType;
   assignedTo: string | null;
+  assignedToId: string | null;
   createdAt: string;
 }

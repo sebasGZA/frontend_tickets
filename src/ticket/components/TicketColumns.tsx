@@ -24,76 +24,89 @@ const priorityConfig: Record<Ticket["priority"], { label: string; className: str
   Critica: { label: "Crítica", className: "bg-red-100 text-red-700" },
 };
 
-export const ticketColumns = (onEdit: (ticket: Ticket) => void): ColumnDef<Ticket, unknown>[] => [
-  {
-    accessorKey: "id",
-    header: "ID",
-    cell: ({ row }) => (
-      <Link to={`/tickets/${row.original.id}`} className="font-medium hover:underline">
-        #{row.original.id.slice(0, 8)}
-      </Link>
-    ),
-  },
-  {
-    accessorKey: "title",
-    header: "Título",
-  },
-  {
-    accessorKey: "client",
-    header: "Cliente",
-  },
-  {
-    accessorKey: "status",
-    header: "Estado",
-    cell: ({ row }) => {
-      const config = statusConfig[row.original.status];
-      return (
-        <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${config.className}`}>
-          {config.label}
-        </span>
-      )
+export const ticketColumns = (
+  onEdit: (ticket: Ticket) => void,
+  onReassign: (ticket: Ticket) => void,
+  isSupervisor: boolean,
+): ColumnDef<Ticket, unknown>[] => [
+    {
+      accessorKey: "id",
+      header: "ID",
+      cell: ({ row }) => (
+        <Link to={`/tickets/${row.original.id}`} className="font-medium hover:underline">
+          #{row.original.id.slice(0, 8)}
+        </Link>
+      ),
     },
-  },
-  {
-    accessorKey: "priority",
-    header: "Prioridad",
-    cell: ({ row }) => {
-      const config = priorityConfig[row.original.priority];
-      return (
-        <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${config.className}`}>
-          {config.label}
-        </span>
-      );
+    {
+      accessorKey: "title",
+      header: "Título",
     },
-  },
-  {
-    accessorKey: "assignedTo",
-    header: "Agente",
-    cell: ({ row }) => row.original.assignedTo ?? (
-      <span className="text-muted-foreground text-sm">Sin asignar</span>
-    ),
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Creado",
-    cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString("es-CO"),
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted">
-          <MoreHorizontal className="h-4 w-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem render={
-            <Link to={`/tickets/${row.original.id}`}>Ver detalle</Link>
-          } />
-          <DropdownMenuItem onClick={() => onEdit(row.original)}>
-            Editar
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
-];
+    {
+      accessorKey: "client",
+      header: "Cliente",
+    },
+    {
+      accessorKey: "status",
+      header: "Estado",
+      cell: ({ row }) => {
+        const config = statusConfig[row.original.status];
+        return (
+          <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${config.className}`}>
+            {config.label}
+          </span>
+        )
+      },
+    },
+    {
+      accessorKey: "priority",
+      header: "Prioridad",
+      cell: ({ row }) => {
+        const config = priorityConfig[row.original.priority];
+        return (
+          <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${config.className}`}>
+            {config.label}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "assignedTo",
+      header: "Agente",
+      cell: ({ row }) => row.original.assignedTo ?? (
+        <span className="text-muted-foreground text-sm">Sin asignar</span>
+      ),
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Creado",
+      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString("es-CO"),
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted">
+            <MoreHorizontal className="h-4 w-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem render={
+              <Link to={`/tickets/${row.original.id}`}>Ver detalle</Link>
+            } />
+            {
+              !isSupervisor &&
+              (<DropdownMenuItem onClick={() => onEdit(row.original)}>
+                Editar
+              </DropdownMenuItem>)
+
+            }
+            {isSupervisor && (
+              <DropdownMenuItem onClick={() => onReassign(row.original)}>
+                Reasignar
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
