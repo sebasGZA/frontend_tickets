@@ -204,7 +204,7 @@ export const TicketsPage = () => {
                             priority: editingTicket.priority,
                             status: editingTicket.status,
                         }}
-                        assignedToId={editingTicket.assignedToId} // ✅ nuevo prop
+                        assignedToId={editingTicket.assignedToId}
                         onSubmit={(values) => update(values)}
                         clients={clients}
                     />

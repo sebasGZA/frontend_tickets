@@ -62,9 +62,6 @@ export const userColumns = (
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => onEdit(row.original)}>Editar</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                            {row.original.isActive ? "Desactivar" : "Activar"}
-                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),

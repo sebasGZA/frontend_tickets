@@ -63,9 +63,8 @@ export const TicketForm = forwardRef<TicketFormHandle, TicketFormProps>(
         const canChangeStatus = admin || isOwner;
 
 
-        const availableStatuses = admin
-            ? ["Abierto", "En_proceso", "Cerrado"]
-            : ["Abierto", "En_proceso"];
+        const availableStatuses =
+            ["Abierto", "En_proceso", "Cerrado"]
 
         const {
             register,

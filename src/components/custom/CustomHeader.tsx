@@ -39,7 +39,7 @@ export const CustomHeader = () => {
     { to: "/", label: "Tickets", key: "tickets", visible: true },
     { to: "/admin/usuarios", label: "Usuarios", key: "usuarios", visible: isAdmin() },
     { to: "/admin/clientes", label: "Clientes", key: "clientes", visible: isAdmin() },
-    { to: "/supervisor/metricas", label: "Métricas", key: "metricas", visible: isSupervisor() },
+    { to: "/metricas", label: "Métricas", key: "metricas", visible: isSupervisor() },
   ];
 
   return (
@@ -50,7 +50,6 @@ export const CustomHeader = () => {
             Tickets<span className="text-primary">.</span>
           </Link>
 
-          {/* Nav desktop */}
           <nav className="hidden md:flex items-center gap-8">
             {links
               .filter((link) => link.visible)
@@ -81,7 +80,6 @@ export const CustomHeader = () => {
               </Button>
             )}
 
-            {/* Trigger mobile */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger render={
                 <Button variant="ghost" size="icon" className="md:hidden">

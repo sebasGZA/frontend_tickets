@@ -1,12 +1,13 @@
 import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router";
 
-import { AdminRoute, AuthenticatedRoute, NotAuthenticatedRoute } from "./components/routes/ProtectedRoutes";
+import { AdminRoute, AuthenticatedRoute, NotAuthenticatedRoute, SupervisorRoute } from "./components/routes/ProtectedRoutes";
 import { LoginPage } from "./auth/pages/login/LoginPage";
 import { TicketsPage } from "./ticket/pages/TicketPage";
 import { UsersPage } from "./user/pages/UserPage";
 import { ClientsPage } from "./client/pages/ClientPage";
 import { TicketDetailPage } from "./ticket/pages/TicketDetailPage";
+import { MetricsPage } from "./metric/pages/MetricsPage";
 
 const AuthLayout = lazy(() => import('./auth/layouts/AuthLayout').then(m => ({ default: m.AuthLayout })))
 const BaseLayout = lazy(() => import('./layouts/BaseLayout').then(m => ({ default: m.BaseLayout })))
@@ -44,6 +45,19 @@ export const appRouter = createBrowserRouter([
                 path: 'login',
                 element: <LoginPage />,
             },
+        ]
+    },
+    {
+        path: 'metricas',
+        element:
+            <SupervisorRoute>
+                <BaseLayout />
+            </SupervisorRoute>,
+        children: [
+            {
+                index: true,
+                element: <MetricsPage />
+            }
         ]
     },
     {

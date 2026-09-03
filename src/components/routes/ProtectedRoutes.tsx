@@ -32,3 +32,14 @@ export const AdminRoute = ({ children }: PropsWithChildren) => {
 
     return children
 }
+
+export const SupervisorRoute = ({ children }: PropsWithChildren) => {
+    const { authStatus, isSupervisor } = useAuthStore()
+    if (authStatus === 'checking') return null;
+
+    if (authStatus === 'no-authenticated') return <Navigate to="/auth/login" />
+
+    if(!isSupervisor()) return <Navigate to="/" />
+
+    return children
+}
