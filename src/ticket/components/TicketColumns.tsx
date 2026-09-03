@@ -24,7 +24,7 @@ const priorityConfig: Record<Ticket["priority"], { label: string; className: str
   Critica: { label: "Crítica", className: "bg-red-100 text-red-700" },
 };
 
-export const ticketColumns: ColumnDef<Ticket, unknown>[] = [
+export const ticketColumns = (onEdit: (ticket: Ticket) => void): ColumnDef<Ticket, unknown>[] => [
   {
     accessorKey: "id",
     header: "ID",
@@ -89,6 +89,9 @@ export const ticketColumns: ColumnDef<Ticket, unknown>[] = [
           <DropdownMenuItem render={
             <Link to={`/tickets/${row.original.id}`}>Ver detalle</Link>
           } />
+          <DropdownMenuItem onClick={() => onEdit(row.original)}>
+            Editar
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),

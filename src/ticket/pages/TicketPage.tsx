@@ -14,10 +14,13 @@ import { CustomFormModal } from "@/components/custom/CustomFormModal";
 import { TicketForm, type TicketFormHandle, type TicketFormValues } from "../components/TicketForm";
 import { createTicketAction } from "../actions/create-ticket.action";
 import { getClientsSelectAction } from "../actions/get-clients-select.action";
+import type { Ticket } from "../interfaces/ticket.interface";
+import { updateTicketAction } from "../actions/update-ticket.action";
 
 export const TicketsPage = () => {
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("todos");
+    const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
@@ -44,7 +47,7 @@ export const TicketsPage = () => {
     const { data: clients = [] } = useQuery({
         queryKey: ["clients-select"],
         queryFn: getClientsSelectAction,
-        enabled: createOpen,
+        enabled: createOpen || !!editingTicket,
     });
 
     const { mutate: create, isPending } = useMutation({
@@ -58,6 +61,25 @@ export const TicketsPage = () => {
     });
 
     const handleCreate = (values: TicketFormValues) => create(values);
+
+
+    const editFormRef = useRef<TicketFormHandle>(null);
+
+    const { mutate: update, isPending: isUpdating } = useMutation({
+        mutationFn: (values: TicketFormValues) => updateTicketAction(editingTicket!.id, values),
+        onSuccess: () => {
+            toast.success("Ticket actualizado");
+            queryClient.invalidateQueries({ queryKey: ["tickets"] });
+            setEditingTicket(null);
+        },
+        onError: (error: any) => {
+            toast.error(
+                error?.response?.status === 403
+                    ? "No podés editar un ticket que no es tuyo"
+                    : "No se pudo actualizar el ticket"
+            );
+        },
+    });
 
     return (
         <div>
@@ -86,7 +108,7 @@ export const TicketsPage = () => {
             />
 
             <CustomDataTable
-                columns={ticketColumns}
+                columns={ticketColumns(setEditingTicket)}
                 data={data?.data ?? []}
                 pageCount={data?.totalPages ?? 0}
                 totalItems={data?.total ?? 0}
@@ -105,6 +127,31 @@ export const TicketsPage = () => {
                 submitLabel="Crear ticket"
             >
                 <TicketForm ref={formRef} onSubmit={handleCreate} clients={clients} />
+            </CustomFormModal>
+
+
+            <CustomFormModal
+                open={!!editingTicket}
+                onOpenChange={(open) => !open && setEditingTicket(null)}
+                title="Editar ticket"
+                onSubmit={() => editFormRef.current?.submit()}
+                isSubmitting={isUpdating}
+                submitLabel="Guardar cambios"
+            >
+                {editingTicket && (
+                    <TicketForm
+                        key={editingTicket.id} // ✅ esto fuerza que React cree una instancia NUEVA del form
+                        ref={editFormRef}
+                        defaultValues={{
+                            title: editingTicket.title,
+                            description: editingTicket.description,
+                            clientId: editingTicket.clientId,
+                            priority: editingTicket.priority,
+                        }}
+                        onSubmit={(values) => update(values)}
+                        clients={clients}
+                    />
+                )}
             </CustomFormModal>
         </div>
     );
