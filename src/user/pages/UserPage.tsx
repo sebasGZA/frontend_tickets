@@ -10,7 +10,7 @@ import { userColumns } from "../components/UserColumns";
 import { UsersFilters } from "../components/UserFilters";
 import { useDebounce } from "@/hooks/useDebounce";
 import { getUsersAction } from "../actions/get-users.action";
-import { UserForm, type UserFormHandle, type UserFormValues } from "../components/UserFrom";
+import { UserForm, type UserFormHandle, type UserFormValues } from "../components/UserForm";
 import { CustomFormModal } from "@/components/custom/CustomFormModal";
 import { createUserAction } from "../actions/create-user.action";
 import type { User } from "../interfaces/user.interface";

@@ -1,6 +1,6 @@
 import { backendApi } from "@/api/backendApi";
 import type { User } from "../interfaces/user.interface";
-import type { UserFormValues } from "../components/UserFrom";
+import type { UserFormValues } from "../components/UserForm";
 
 export const updateUserAction = async (
     id: string,

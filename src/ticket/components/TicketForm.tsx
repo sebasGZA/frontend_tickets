@@ -1,5 +1,5 @@
-import { forwardRef, useEffect, useImperativeHandle } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { forwardRef, useImperativeHandle } from "react";
+import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
@@ -14,49 +14,75 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import type { Client } from "@/client/interfaces/client.interface";
+import { useAuthStore } from "@/auth/store/auth.store";
 
-const ticketSchema = z.object({
+const baseSchema = {
     title: z.string().min(5, "El título debe tener al menos 5 caracteres"),
     description: z.string().min(10, "La descripción debe tener al menos 10 caracteres"),
     clientId: z.string().min(1, "Seleccioná un cliente"),
     priority: z.enum(["Baja", "Media", "Alta", "Critica"]),
+};
+
+const createTicketSchema = z.object({
+    ...baseSchema,
+    status: z.enum(["Abierto", "En_proceso", "Cerrado"]).optional(),
 });
 
-export type TicketFormValues = z.infer<typeof ticketSchema>;
+const editTicketSchema = z.object({
+    ...baseSchema,
+    status: z.enum(["Abierto", "En_proceso", "Cerrado"]),
+});
+
+export type TicketFormValues = z.infer<typeof editTicketSchema>;
 
 export interface TicketFormHandle {
     submit: () => void;
 }
 
 interface TicketFormProps {
+    mode: "create" | "edit";
     defaultValues?: Partial<TicketFormValues>;
     onSubmit: (values: TicketFormValues) => void;
     clients: Client[];
+    assignedToId?: string | null;
 }
 
+const statusLabels: Record<string, string> = {
+    Abierto: "Abierto",
+    En_proceso: "En proceso",
+    Cerrado: "Cerrado",
+};
+
 export const TicketForm = forwardRef<TicketFormHandle, TicketFormProps>(
-    ({ defaultValues, onSubmit, clients }, ref) => {
+    ({ mode, defaultValues, onSubmit, clients, assignedToId }, ref) => {
+        const schema = mode === "edit" ? editTicketSchema : createTicketSchema;
+        const { user, isAdmin } = useAuthStore();
+
+        const admin = isAdmin();
+        const isOwner = assignedToId === user?.userId;
+        const canChangeStatus = admin || isOwner;
+
+
+        const availableStatuses = admin
+            ? ["Abierto", "En_proceso", "Cerrado"]
+            : ["Abierto", "En_proceso"];
+
         const {
             register,
             handleSubmit,
             control,
-            reset,
-            getValues,
             formState: { errors },
         } = useForm<TicketFormValues>({
-            resolver: zodResolver(ticketSchema),
+            resolver: zodResolver(schema) as Resolver<TicketFormValues>,
             defaultValues: {
                 title: "",
                 description: "",
                 clientId: "",
                 priority: "Media",
+                ...(mode === "edit" && { status: "Abierto" }),
                 ...defaultValues,
             },
         });
-
-        useEffect(() => {
-            if (defaultValues) reset({ ...getValues(), ...defaultValues });
-        }, [defaultValues]);
 
         useImperativeHandle(ref, () => ({
             submit: () => handleSubmit(onSubmit)(),
@@ -66,66 +92,47 @@ export const TicketForm = forwardRef<TicketFormHandle, TicketFormProps>(
             <form className="space-y-4">
                 <div className="space-y-1.5">
                     <Label htmlFor="title">Título</Label>
-                    <Input
-                        id="title"
-                        placeholder="No se puede acceder al panel de facturación"
-                        {...register("title")}
-                    />
-                    {errors.title && (
-                        <p className="text-sm text-destructive">{errors.title.message}</p>
-                    )}
+                    <Input id="title" placeholder="..." {...register("title")} disabled={mode === "edit" && !admin && !isOwner} />
+                    {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
                 </div>
 
                 <div className="space-y-1.5">
                     <Label htmlFor="description">Descripción</Label>
-                    <Textarea
-                        id="description"
-                        rows={4}
-                        placeholder="Detalle del problema..."
-                        {...register("description")}
-                    />
-                    {errors.description && (
-                        <p className="text-sm text-destructive">{errors.description.message}</p>
-                    )}
+                    <Textarea id="description" rows={4} {...register("description")} disabled={mode === "edit" && !admin && !isOwner} />
+                    {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
                 </div>
 
                 <div className="space-y-1.5">
-                    <Label htmlFor="clienteId">Cliente</Label>
+                    <Label htmlFor="clientId">Cliente</Label>
                     <Controller
                         control={control}
                         name="clientId"
                         render={({ field }) => (
-                            <Select value={field.value} onValueChange={(v) => field.onChange(v ?? "")}>
-                                <SelectTrigger className="w-full" id="clienteId">
+                            <Select value={field.value} onValueChange={(v) => field.onChange(v ?? "")} disabled={mode === "edit" && !admin}>
+                                <SelectTrigger className="w-full" id="clientId">
                                     <SelectValue placeholder="Seleccioná un cliente">
-                                        {(value: string) =>
-                                            clients.find((c) => c.id === value)?.name ?? "Seleccioná un cliente"
-                                        }
+                                        {(value: string) => clients.find((c) => c.id === value)?.name ?? "Seleccioná un cliente"}
                                     </SelectValue>
                                 </SelectTrigger>
                                 <SelectContent>
                                     {clients.map((c) => (
-                                        <SelectItem key={c.id} value={c.id}>
-                                            {c.name}
-                                        </SelectItem>
+                                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         )}
                     />
-                    {errors.clientId && (
-                        <p className="text-sm text-destructive">{errors.clientId.message}</p>
-                    )}
+                    {errors.clientId && <p className="text-sm text-destructive">{errors.clientId.message}</p>}
                 </div>
 
                 <div className="space-y-1.5">
-                    <Label htmlFor="prioridad">Prioridad</Label>
+                    <Label htmlFor="priority">Prioridad</Label>
                     <Controller
                         control={control}
                         name="priority"
                         render={({ field }) => (
-                            <Select value={field.value} onValueChange={(v) => field.onChange(v ?? "media")}>
-                                <SelectTrigger className="w-full" id="prioridad">
+                            <Select value={field.value} onValueChange={(v) => field.onChange(v ?? "Media")}>
+                                <SelectTrigger className="w-full" id="priority">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -137,10 +144,42 @@ export const TicketForm = forwardRef<TicketFormHandle, TicketFormProps>(
                             </Select>
                         )}
                     />
-                    {errors.priority && (
-                        <p className="text-sm text-destructive">{errors.priority.message}</p>
-                    )}
+                    {errors.priority && <p className="text-sm text-destructive">{errors.priority.message}</p>}
                 </div>
+
+                {mode === "edit" && (
+                    <div className="space-y-1.5">
+                        <Label htmlFor="status">Estado</Label>
+                        <Controller
+                            control={control}
+                            name="status"
+                            render={({ field }) => (
+                                <Select
+                                    value={field.value}
+                                    onValueChange={(v) => field.onChange(v ?? "Abierto")}
+                                    disabled={!canChangeStatus}
+                                >
+                                    <SelectTrigger className="w-full" id="status">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableStatuses.map((s) => (
+                                            <SelectItem key={s} value={s}>{statusLabels[s]}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
+                        {!canChangeStatus && (
+                            <p className="text-xs text-muted-foreground">
+                                Solo el agente asignado o un administrador pueden cambiar el estado.
+                            </p>
+                        )}
+                        {errors.status && (
+                            <p className="text-sm text-destructive">{(errors as any).status?.message}</p>
+                        )}
+                    </div>
+                )}
             </form>
         );
     }

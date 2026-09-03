@@ -138,8 +138,8 @@ export const TicketsPage = () => {
 
             <CustomDataTable
                 columns={ticketColumns(
-                    setEditingTicket, 
-                    setReassigningTicket, 
+                    setEditingTicket,
+                    setReassigningTicket,
                     isSupervisor(),
                     isAdmin()
                 )}
@@ -180,7 +180,7 @@ export const TicketsPage = () => {
                 isSubmitting={isPending}
                 submitLabel="Crear ticket"
             >
-                <TicketForm ref={formRef} onSubmit={handleCreate} clients={clients} />
+                <TicketForm ref={formRef} onSubmit={handleCreate} clients={clients} mode="create" />
             </CustomFormModal>
 
 
@@ -194,6 +194,7 @@ export const TicketsPage = () => {
             >
                 {editingTicket && (
                     <TicketForm
+                        mode="edit"
                         key={editingTicket.id}
                         ref={editFormRef}
                         defaultValues={{
@@ -201,7 +202,9 @@ export const TicketsPage = () => {
                             description: editingTicket.description,
                             clientId: editingTicket.clientId,
                             priority: editingTicket.priority,
+                            status: editingTicket.status,
                         }}
+                        assignedToId={editingTicket.assignedToId} // ✅ nuevo prop
                         onSubmit={(values) => update(values)}
                         clients={clients}
                     />
