@@ -1,4 +1,3 @@
-// client/actions/update-client.action.ts
 import { backendApi } from "@/api/backendApi";
 import type { ClientFormValues } from "../components/ClientForm";
 import type { Client } from "../interfaces/client.interface";

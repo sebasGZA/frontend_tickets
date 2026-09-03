@@ -189,7 +189,7 @@ export const TicketsPage = () => {
             >
                 {editingTicket && (
                     <TicketForm
-                        key={editingTicket.id} // ✅ esto fuerza que React cree una instancia NUEVA del form
+                        key={editingTicket.id}
                         ref={editFormRef}
                         defaultValues={{
                             title: editingTicket.title,

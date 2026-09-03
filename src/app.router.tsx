@@ -6,6 +6,7 @@ import { LoginPage } from "./auth/pages/login/LoginPage";
 import { TicketsPage } from "./ticket/pages/TicketPage";
 import { UsersPage } from "./user/pages/UserPage";
 import { ClientsPage } from "./client/pages/ClientPage";
+import { TicketDetailPage } from "./ticket/pages/TicketDetailPage";
 
 const AuthLayout = lazy(() => import('./auth/layouts/AuthLayout').then(m => ({ default: m.AuthLayout })))
 const BaseLayout = lazy(() => import('./layouts/BaseLayout').then(m => ({ default: m.BaseLayout })))
@@ -21,6 +22,10 @@ export const appRouter = createBrowserRouter([
             {
                 index: true,
                 element: <TicketsPage />
+            },
+            {
+                path: 'tickets/:id',
+                element: <TicketDetailPage />
             },
         ],
     },
