@@ -37,9 +37,10 @@ export const TicketsFilters = ({
             </SelectTrigger>
             <SelectContent>
                 <SelectItem value="todos">Todos los estados</SelectItem>
-                <SelectItem value="abierto">Abierto</SelectItem>
-                <SelectItem value="en_progreso">En progreso</SelectItem>
-                <SelectItem value="cerrado">Cerrado</SelectItem>
+                <SelectItem value="Abierto">Abierto</SelectItem>
+                <SelectItem value="En_proceso">En proceso</SelectItem>
+                <SelectItem value="Cerrado">Cerrado</SelectItem>
+                <SelectItem value="Reabierto">Reabierto</SelectItem>
             </SelectContent>
         </Select>
     </div>
