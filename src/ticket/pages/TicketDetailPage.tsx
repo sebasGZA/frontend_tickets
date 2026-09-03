@@ -20,7 +20,6 @@ const statusConfig: Record<Ticket["status"], { label: string; className: string 
     Abierto: { label: "Abierto", className: "bg-slate-100 text-slate-700" },
     En_proceso: { label: "En proceso", className: "bg-blue-100 text-blue-700" },
     Cerrado: { label: "Cerrado", className: "bg-orange-100 text-orange-700" },
-    Reabierto: { label: "Reabierto", className: "bg-red-100 text-red-700" },
 };
 
 const priorityConfig: Record<string, { label: string; className: string }> = {

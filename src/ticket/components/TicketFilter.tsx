@@ -40,7 +40,6 @@ export const TicketsFilters = ({
                 <SelectItem value="Abierto">Abierto</SelectItem>
                 <SelectItem value="En_proceso">En proceso</SelectItem>
                 <SelectItem value="Cerrado">Cerrado</SelectItem>
-                <SelectItem value="Reabierto">Reabierto</SelectItem>
             </SelectContent>
         </Select>
     </div>
