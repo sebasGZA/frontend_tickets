@@ -12,6 +12,7 @@ type AuthState = {
     authStatus: AuthStatus,
 
     isAdmin: () => boolean,
+    isSupervisor: () => boolean,
 
     login: (email: string, password: string) => Promise<boolean>,
     logout: () => void,
@@ -25,6 +26,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     isAdmin: () => {
         const role = get().user?.role;
         return role === 'Admin'
+    },
+    isSupervisor: () => {
+        const role = get().user?.role;
+        return role === 'Supervisor'
     },
     login: async (email: string, password: string) => {
         try {
