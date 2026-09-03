@@ -22,7 +22,7 @@ export const TicketsFilters = ({
 }: TicketsFiltersProps) => (
     <div className="flex items-center gap-3 mb-4">
         <Input
-            placeholder="Buscar por título..."
+            placeholder="Buscar por título, descripcion o cliente..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             className="max-w-sm h-10"

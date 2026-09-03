@@ -86,7 +86,7 @@ export function CustomDataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground">
-                  No hay tickets todavía.
+                  No hay items todavía.
                 </TableCell>
               </TableRow>
             )}
@@ -95,7 +95,7 @@ export function CustomDataTable<TData, TValue>({
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{totalItems} ticket(s)</p>
+        <p className="text-sm text-muted-foreground">{totalItems} items(s)</p>
         <div className="flex items-center gap-4">
           <p className="text-sm text-muted-foreground">
             Página {pagination.pageIndex + 1} de {pageCount || 1}

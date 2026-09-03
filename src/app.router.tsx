@@ -5,6 +5,7 @@ import { AdminRoute, AuthenticatedRoute, NotAuthenticatedRoute } from "./compone
 import { LoginPage } from "./auth/pages/login/LoginPage";
 import { TicketsPage } from "./ticket/pages/TicketPage";
 import { UsersPage } from "./user/pages/UserPage";
+import { ClientsPage } from "./client/pages/ClientPage";
 
 const AuthLayout = lazy(() => import('./auth/layouts/AuthLayout').then(m => ({ default: m.AuthLayout })))
 const BaseLayout = lazy(() => import('./layouts/BaseLayout').then(m => ({ default: m.BaseLayout })))
@@ -57,7 +58,7 @@ export const appRouter = createBrowserRouter([
             },
             {
                 path: 'clientes',
-                element: <h1>Clientes page</h1>
+                element: <ClientsPage />
             },
         ]
     },
