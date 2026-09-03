@@ -10,9 +10,11 @@ import { userColumns } from "../components/UserColumns";
 import { UsersFilters } from "../components/UserFilters";
 import { useDebounce } from "@/hooks/useDebounce";
 import { getUsersAction } from "../actions/get-users.action";
-import { UserForm, type UserFormHandle } from "../components/UserFrom";
+import { UserForm, type UserFormHandle, type UserFormValues } from "../components/UserFrom";
 import { CustomFormModal } from "@/components/custom/CustomFormModal";
 import { createUserAction } from "../actions/create-user.action";
+import type { User } from "../interfaces/user.interface";
+import { updateUserAction } from "../actions/update-user.action";
 
 export const UsersPage = () => {
     const [search, setSearch] = useState("");
@@ -50,6 +52,20 @@ export const UsersPage = () => {
         onError: () => toast.error("No se pudo crear el usuario"),
     });
 
+    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const editFormRef = useRef<UserFormHandle>(null);
+
+    const { mutate: update, isPending: isUpdating } = useMutation({
+        mutationFn: (values: UserFormValues) => updateUserAction(editingUser!.id, values),
+        onSuccess: () => {
+            toast.success("Usuario actualizado");
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+            setEditingUser(null);
+        },
+        onError: () => toast.error("No se pudo actualizar el usuario"),
+    });
+
+
     return (
         <div>
             <div className="mb-8 flex items-center justify-between">
@@ -77,8 +93,9 @@ export const UsersPage = () => {
                 }}
             />
 
+
             <CustomDataTable
-                columns={userColumns}
+                columns={userColumns(setEditingUser)}
                 data={data?.data ?? []}
                 pageCount={data?.totalPages ?? 0}
                 totalItems={data?.total ?? 0}
@@ -97,6 +114,31 @@ export const UsersPage = () => {
                 submitLabel="Crear usuario"
             >
                 <UserForm mode="create" ref={createFormRef} onSubmit={(values) => create(values)} />
+            </CustomFormModal>
+
+            <CustomFormModal
+                open={!!editingUser}
+                onOpenChange={(open) => !open && setEditingUser(null)}
+                title="Editar usuario"
+                description={editingUser ? editingUser.email : undefined}
+                onSubmit={() => editFormRef.current?.submit()}
+                isSubmitting={isUpdating}
+                submitLabel="Guardar cambios"
+            >
+                {editingUser && (
+                    <UserForm
+                        mode="edit"
+                        key={editingUser.id}
+                        ref={editFormRef}
+                        defaultValues={{
+                            name: editingUser.name,
+                            email: editingUser.email,
+                            role: editingUser.role,
+                            password: "",
+                        }}
+                        onSubmit={(values) => update(values)}
+                    />
+                )}
             </CustomFormModal>
         </div>
     );
