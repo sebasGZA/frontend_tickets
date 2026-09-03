@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from "react-router";
 
 import { AdminRoute, AuthenticatedRoute, NotAuthenticatedRoute } from "./components/routes/ProtectedRoutes";
 import { LoginPage } from "./auth/pages/login/LoginPage";
+import { TicketsPage } from "./ticket/pages/TicketPage";
 
 const AuthLayout = lazy(() => import('./auth/layouts/AuthLayout').then(m => ({ default: m.AuthLayout })))
 const BaseLayout = lazy(() => import('./layouts/BaseLayout').then(m => ({ default: m.BaseLayout })))
@@ -17,7 +18,7 @@ export const appRouter = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <h1>Tickets page</h1>
+                element: <TicketsPage />
             },
         ],
     },
