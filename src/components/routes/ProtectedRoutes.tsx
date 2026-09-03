@@ -1,0 +1,45 @@
+import type { PropsWithChildren } from "react";
+import { Navigate } from "react-router";
+
+import { useAuthStore } from "@/auth/store/auth.store";
+
+export const AuthenticatedRoute = ({ children }: PropsWithChildren) => {
+    const { authStatus } = useAuthStore()
+    if (authStatus === 'checking') return null;
+
+    if (authStatus === 'no-authenticated') return <Navigate to="/auth/login" />
+
+    return children
+}
+
+
+export const NotAuthenticatedRoute = ({ children }: PropsWithChildren) => {
+    const { authStatus } = useAuthStore()
+    if (authStatus === 'checking') return null;
+
+    if (authStatus === 'authenticated') return <Navigate to="/" />
+
+    return children
+}
+
+export const AdminRoute = ({ children }: PropsWithChildren) => {
+    const { authStatus, isAdmin } = useAuthStore()
+    if (authStatus === 'checking') return null;
+
+    if (authStatus === 'no-authenticated') return <Navigate to="/auth/login" />
+
+    if(!isAdmin()) return <Navigate to="/" />
+
+    return children
+}
+
+export const SupervisorRoute = ({ children }: PropsWithChildren) => {
+    const { authStatus, isSupervisor } = useAuthStore()
+    if (authStatus === 'checking') return null;
+
+    if (authStatus === 'no-authenticated') return <Navigate to="/auth/login" />
+
+    if(!isSupervisor()) return <Navigate to="/" />
+
+    return children
+}
