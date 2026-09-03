@@ -1,6 +1,6 @@
 import { Outlet } from "react-router"
-import { CustomHeader } from "../components/CustomHeader"
-import { CustomFooter } from "../components/CustomFooter"
+import { CustomHeader } from "../components/custom/CustomHeader"
+import { CustomFooter } from "../components/custom/CustomFooter"
 
 export const BaseLayout = () => {
   return (
