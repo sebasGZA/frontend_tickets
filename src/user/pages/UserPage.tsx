@@ -1,12 +1,18 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { PaginationState } from "@tanstack/react-table";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 import { CustomDataTable } from "@/components/custom/CustomDataTable";
 import { userColumns } from "../components/UserColumns";
 import { UsersFilters } from "../components/UserFilters";
 import { useDebounce } from "@/hooks/useDebounce";
 import { getUsersAction } from "../actions/get-users.action";
+import { UserForm, type UserFormHandle } from "../components/UserFrom";
+import { CustomFormModal } from "@/components/custom/CustomFormModal";
+import { createUserAction } from "../actions/create-user.action";
 
 export const UsersPage = () => {
     const [search, setSearch] = useState("");
@@ -16,6 +22,7 @@ export const UsersPage = () => {
         pageSize: 10,
     });
 
+    const queryClient = useQueryClient();
     const debouncedSearch = useDebounce(search, 400);
 
     const { data, isLoading } = useQuery({
@@ -30,12 +37,32 @@ export const UsersPage = () => {
         placeholderData: (prev) => prev,
     });
 
+    const [createOpen, setCreateOpen] = useState(false);
+    const createFormRef = useRef<UserFormHandle>(null);
+
+    const { mutate: create, isPending: isCreating } = useMutation({
+        mutationFn: createUserAction,
+        onSuccess: () => {
+            toast.success("Usuario creado");
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+            setCreateOpen(false);
+        },
+        onError: () => toast.error("No se pudo crear el usuario"),
+    });
+
     return (
         <div>
-            <div className="mb-8">
-                <h1 className="text-2xl font-semibold tracking-tight">Usuarios</h1>
-                <p className="text-muted-foreground mt-1">Administrá las cuentas del equipo</p>
+            <div className="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-semibold tracking-tight">Usuarios</h1>
+                    <p className="text-muted-foreground mt-1">Administrá las cuentas del equipo</p>
+                </div>
+                <Button onClick={() => setCreateOpen(true)} className="gap-1.5">
+                    <Plus className="h-4 w-4" />
+                    Nuevo usuario
+                </Button>
             </div>
+
 
             <UsersFilters
                 term={search}
@@ -59,6 +86,18 @@ export const UsersPage = () => {
                 onPaginationChange={setPagination}
                 isLoading={isLoading}
             />
+
+            <CustomFormModal
+                open={createOpen}
+                onOpenChange={setCreateOpen}
+                title="Nuevo usuario"
+                description="Creá una cuenta para un miembro del equipo"
+                onSubmit={() => createFormRef.current?.submit()}
+                isSubmitting={isCreating}
+                submitLabel="Crear usuario"
+            >
+                <UserForm mode="create" ref={createFormRef} onSubmit={(values) => create(values)} />
+            </CustomFormModal>
         </div>
     );
 };
