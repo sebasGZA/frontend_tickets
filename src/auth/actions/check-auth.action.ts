@@ -6,7 +6,7 @@ export const checkAuthAction = async () => {
     if (!token) throw new Error('No token found');
 
     try {
-        const { data } = await backendApi.get<AuthResponse>('/auth/check-status');
+        const { data } = await backendApi.get<AuthResponse>('/auth/renew');
 
         localStorage.setItem('token', data.token);
         return data;
